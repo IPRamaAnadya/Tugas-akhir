@@ -1,4 +1,4 @@
-#Import Library
+# Import Library
 from crypt import methods
 from logging import debug
 from flask import Flask, request
@@ -12,6 +12,9 @@ import librosa.feature
 import joblib
 from model import Proses
 
+# fix deploy on vps
+os.environ['NUMBA_CACHE_DIR'] = '/tmp/'
+
 # init object flask
 app = Flask(__name__)
 
@@ -21,32 +24,35 @@ api = Api(app)
 # init cors
 CORS(app)
 
-#init var
+# init var
 identitas = {
-            "nama":"I Putu Rama Anadya",
+    "nama": "I Putu Rama Anadya",
             "umur": 21
-        }
+}
 secIdentitas = {}
 
 # load model
 model = joblib.load("model.sav")
+
 
 @app.route("/")
 def main():
     response = {"msg": "Hello World"}
     return response
 
-@app.route("/api", methods = ['GET', 'POST'])
+
+@app.route("/api", methods=['GET', 'POST'])
 def second():
     if request.method == "GET":
         return identitas
     if request.method == "POST":
         nama = request.args.get("nama")
         umur = request.args.get("umur")
-        identitas["nama"]= nama
-        identitas["umur"]= umur
-        response = {"msg":"Success"}
+        identitas["nama"] = nama
+        identitas["umur"] = umur
+        response = {"msg": "Success"}
         return response
+
 
 @app.route("/data", methods=["GET", "POST"])
 def coba():
@@ -61,14 +67,16 @@ def coba():
         response = {"msg": result(data)}
         return response
 
+
 def prediction():
     global model
     y, sr = librosa.load("audio/temp.wav")
     mfcc = np.array(getMFCC(y))
     new_mfcc = np.array(mfcc)
-    X = np.reshape(new_mfcc,(1, new_mfcc.size))
+    X = np.reshape(new_mfcc, (1, new_mfcc.size))
     res = model.predict(X)[0]
     return res
+
 
 def result(data):
     if(data == 0):
@@ -84,13 +92,14 @@ def result(data):
 
 
 def getMFCC(f):
-    mfcc = librosa.feature.mfcc(y=f, n_mfcc = 13)
+    mfcc = librosa.feature.mfcc(y=f, n_mfcc=13)
     return [np.ndarray.flatten(mfcc)][0]
 
+
 def text(data):
-    nama = "namaku "+ data
+    nama = "namaku " + data
     return nama
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port = int(os.environ.get('PORT', 5000)))
+    app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
