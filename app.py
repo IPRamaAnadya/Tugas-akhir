@@ -31,6 +31,11 @@ secIdentitas = {}
 # load model
 model = joblib.load("model.sav")
 
+@app.route("/")
+def main():
+    response = {"msg": "Hello World"}
+    return response
+
 @app.route("/api", methods = ['GET', 'POST'])
 def second():
     if request.method == "GET":
