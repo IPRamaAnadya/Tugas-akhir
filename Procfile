@@ -1,1 +1,1 @@
-web: gunicorn app:app model:Proses
+web: gunicorn app:app
